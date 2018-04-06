@@ -1,7 +1,7 @@
 # Advanced Lane Finding
 
 <p>
-<img width="480" height="270" src="./output_images/project_output.gif" alt="Detected Lane">
+<img width="640" src="./output_images/project_output.gif" alt="Detected Lane">
 </p>
 
 The goal of this project is to write a software pipeline to identify the lane boundaries in a traffic video from the perspective of a moving vehicle from which the video was captured. A [writeup](./writeup_report.md) of the project describes the details of the lane detection pipeline.  
@@ -41,3 +41,6 @@ Suggested setup:
 ```
 
 The project notebook is [`find-lane-lines.ipynb`](./find-lane-lines.ipynb)
+
+###### NOTE:
+Because of their large sizes, the project's video files are stored in [Git LFS](https://github.com/git-lfs/git-lfs). Please install the Git LFS client to ensure that video files are downloaded properly when this project repo is cloned.
