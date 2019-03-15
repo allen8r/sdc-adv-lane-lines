@@ -4,6 +4,7 @@ from lane_finder.camera import Camera
 from lane_finder.binary_threshold import BinaryThresholder
 from lane_finder.persp_transform import PerspectiveTransformer
 from lane_finder.lane import LaneLines
+from lane_finder.lane import LaneCurvature
 from lane_finder.visuals import Visualizer
 
 class LaneDetector():
@@ -22,9 +23,11 @@ class LaneDetector():
     self.warped_combined = None
 
     self.lane_lines = LaneLines()
-    self.lane_curve_rads = None
+    self.lane_curvature = None
+    self.lane_curve_rads = []
     self.vehichle_pos = None
 
+    
     
 
 
@@ -53,10 +56,19 @@ class LaneDetector():
     self.detect_lane_lines(self.warped_combined)
 
     # 6. Determine lane curvature
-
+    self.lane_curvature = LaneCurvature(
+                            self.lane_lines.leftx,
+                            self.lane_lines.lefty,
+                            self.lane_lines.rightx,
+                            self.lane_lines.righty,
+                            np.max(self.lane_lines.ploty)
+                          )
+    self.lane_curve_rads.append(self.lane_curvature.left_curvature)
+    self.lane_curve_rads.append(self.lane_curvature.right_curvature)
+    
     # 7. Determine vehicle position within lane
 
-    # 8. Mark and visualize lane
+    # 8. Mark and visualize lane with HUD info
 
     # 9. Clean up; reset thresholder once image is fully processed; 
     # get it ready for next image to be processed

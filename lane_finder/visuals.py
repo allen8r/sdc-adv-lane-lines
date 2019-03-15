@@ -55,17 +55,17 @@ class Visualizer():
 
     #Draw 2nd-degree polynomial fit curves
     yellow = [255, 255, 0]
-    #out_img[np.array(lane_lines.ploty, np.int32), np.array(lane_lines.left_fitx, np.int32)] = yellow
-    #out_img[np.array(lane_lines.ploty, np.int32), np.array(lane_lines.right_fitx, np.int32)] = yellow
+    curve_thickness = 7
+    
     left_pts = np.dstack((lane_lines.left_fitx, lane_lines.ploty))
     left_pts = np.array(left_pts, np.int32)
     left_pts = left_pts.reshape((-1, 1, 2))
-    cv2.polylines(out_img, [left_pts], isClosed=False, color=yellow, thickness=5)
+    cv2.polylines(out_img, [left_pts], isClosed=False, color=yellow, thickness=curve_thickness)
 
     right_pts = np.dstack((lane_lines.right_fitx, lane_lines.ploty))
     right_pts = np.array(right_pts, np.int32)
     right_pts = right_pts.reshape((-1, 1, 2))
-    cv2.polylines(out_img, [right_pts], isClosed=False, color=yellow, thickness=5)
+    cv2.polylines(out_img, [right_pts], isClosed=False, color=yellow, thickness=curve_thickness)
 
     self.visualized = out_img
     
