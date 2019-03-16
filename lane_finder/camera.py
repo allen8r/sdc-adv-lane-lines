@@ -5,9 +5,11 @@ import numpy as np
 
 class Camera():
   def __init__(self):
+      self.CAM_CALIBRATED = False
+
       self.camera_matrix = None
       self.distortion_coefficients = None
-      self.CAM_CALIBRATED = False
+      
     
   def calibrate(self, img_dir='camera_cal', nx=9, ny=6):
       """

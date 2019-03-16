@@ -31,16 +31,17 @@ class LaneLines():
 
 class LaneCurvature():
 
-  def __init__(self, leftx= 0, lefty=0, rightx=0, righty=0, y_eval=0):
-    self.left_x = leftx
-    self.left_y = lefty
-    self.right_x = rightx
-    self.right_y = righty
-    self.y_eval = y_eval
+  def __init__(self, lane_lines=LaneLines()):
+    self.left_x = lane_lines.leftx
+    self.left_y = lane_lines.lefty
+    self.right_x = lane_lines.rightx
+    self.right_y = lane_lines.righty
+    self.y_eval = np.max(lane_lines.ploty)
     
     self.left_curvature = 0
     self.right_curvature = 0
 
+    # Calculate lane curvatures
     self.lane_curvatures()
 
 

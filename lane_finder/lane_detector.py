@@ -7,6 +7,7 @@ from lane_finder.lane import LaneLines
 from lane_finder.lane import LaneCurvature
 from lane_finder.visuals import Visualizer
 
+
 class LaneDetector():
 
   def __init__(self):
@@ -19,6 +20,7 @@ class LaneDetector():
 
     self.image = None
     self.corrected_image = None
+    self.warp_corrected = None
     self.combined = None
     self.warped_combined = None
 
@@ -26,6 +28,9 @@ class LaneDetector():
     self.lane_curvature = None
     self.lane_curve_rads = []
     self.vehichle_pos = None
+
+    # Visuals
+    self.result = None
 
     
     
@@ -50,28 +55,36 @@ class LaneDetector():
     self.combined = self.binary_thresholder.combine_thresholds(self.corrected_image)
 
     # 4. Warp combined binary thresholds image to "bird's eye view"
+    # first store warped corrected image for reference
+    self.warped_corrected = self.perspective_transformer.warp_img(self.corrected_image)
     self.warped_combined = self.perspective_transformer.warp_img(self.combined)
 
     # 5. Detect lane lines using window boxing
     self.detect_lane_lines(self.warped_combined)
 
     # 6. Determine lane curvature
-    self.lane_curvature = LaneCurvature(
-                            self.lane_lines.leftx,
-                            self.lane_lines.lefty,
-                            self.lane_lines.rightx,
-                            self.lane_lines.righty,
-                            np.max(self.lane_lines.ploty)
-                          )
+    self.lane_curvature = LaneCurvature(self.lane_lines)
     self.lane_curve_rads.append(self.lane_curvature.left_curvature)
     self.lane_curve_rads.append(self.lane_curvature.right_curvature)
     
     # 7. Determine vehicle position within lane
+    self.vehichle_pos = self.position_offset()
 
     # 8. Mark and visualize lane with HUD info
+    self.result = self.visualizer.draw_lane(
+                              self.warped_combined,
+                              self.corrected_image,
+                              self.perspective_transformer.perspective_Minv,
+                              self.lane_lines)
+
+    self.result = self.visualizer.add_HUD_info(
+                              self.result,
+                              self.lane_curve_rads,
+                              self.vehichle_pos)
 
     # 9. Clean up; reset thresholder once image is fully processed; 
     # get it ready for next image to be processed
+    self.reset_pipeline()
 
 
 
@@ -172,6 +185,36 @@ class LaneDetector():
     return self.lane_lines
 
 
+  def position_offset(self):
+    '''Assume the camera is mounted at the center of the car,
+    such that the lane center is the midpoint at the bottom of
+    the image between the two lines detected. The offset of the
+    lane center from the center of the image (converted from
+    pixels to meters) is the distance from the center of the lane.
+    '''
+    x_m_per_pixel = 3.7/700
+
+    y_eval = np.max(self.lane_lines.ploty)
+    left = self.eval_poly2_fit(self.lane_lines.left_fit, y_eval)
+    right = self.eval_poly2_fit(self.lane_lines.right_fit, y_eval)
+    lane_center = (left + right) / 2
+    car_center = self.image.shape[1] / 2
+    
+    offset = car_center - lane_center
+    
+    return offset * x_m_per_pixel
+
+
+  def eval_poly2_fit(self, polyfit2, d):
+    """
+    ployfit2 -- the lane line 2-degree polynomial curve function fit to the lane line pixels
+    d -- the dimension value to be evaluated in the polyfit function
+    """
+    return polyfit2[0]*d**2 + polyfit2[1]*d + polyfit2[2]
+
   def get_histogram(self, image):
     '''Retrieve histogram of pixel density for lane lines in lower half of the image'''
-    return np.sum(image[image.shape[0]//2:,:], axis=0) 
+    return np.sum(image[image.shape[0]//2:,:], axis=0)
+
+  def reset_pipeline(self):
+    pass
