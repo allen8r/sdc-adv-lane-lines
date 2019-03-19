@@ -84,7 +84,9 @@ class LaneDetector():
 
     # 9. Clean up; reset thresholder once image is fully processed; 
     # get it ready for next image to be processed
-    self.reset_pipeline()
+    #self.reset_pipeline()
+
+    return self.result
 
 
 
