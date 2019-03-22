@@ -5,7 +5,9 @@ class Visualizer():
 
   def __init__(self):
     self.visualized = None
-    self.detected_lanes_warped = None
+    self.combined_binary = None
+    self.warped_combined = None
+    self.detected_lane_lines_warped = None
     self.lane_highlighted = None
     self.lane_highlighted_HUD_info = None
     
@@ -42,7 +44,7 @@ class Visualizer():
 
     return self.visualized
 
-  def visualize_detected_lanes(self, warped_binary, lane_lines):
+  def visualize_detected_lane_lines(self, warped_binary, lane_lines):
     # Create an output image to draw on and visualize the result
     out_img = np.dstack((warped_binary, warped_binary, warped_binary)) * 255
 
@@ -73,9 +75,9 @@ class Visualizer():
     right_pts = right_pts.reshape((-1, 1, 2))
     cv2.polylines(out_img, [right_pts], isClosed=False, color=self.YELLOW, thickness=curve_thickness)
 
-    self.detected_lanes_warped = out_img
+    self.detected_lane_lines_warped = out_img
     
-    return self.detected_lanes_warped
+    return self.detected_lane_lines_warped
 
 
   def draw_lane(self, warped_img, corrected, persp_Minv, lane_lines):
@@ -100,35 +102,40 @@ class Visualizer():
     
     return self.lane_highlighted
 
-  def add_HUD_info(self, image, lane_curve_rads, vehicle_position):
-    display = image
-    
+  def add_HUD_info(self, image, lane_curve_rads, vehicle_position, histogram):
+    overlay = np.zeros_like(image).astype(np.uint8)
+
     font = cv2.FONT_HERSHEY_SIMPLEX
     fontsize_mult = 1
     fontthickness = 2
     linetype = cv2.LINE_AA
     
-    
     # Add curvature data
     l_curvature = "{:>5.3f} km".format(lane_curve_rads[0]/1000)
     r_curvature = "{:>5.3f} km".format(lane_curve_rads[1]/1000)
     
-    col1 = 50
-    col2 = 125
+    overlay_width = overlay.shape[1]
+    overlay_height = overlay.shape[0]
+
+    left_align = overlay_width - 400
+    col1 = left_align + 50
+    col2 = col1 + 75
+
+    top_align = 50
     row_height = 40
-    row1 = 100
+    row1 = top_align
     row2 = row1 + row_height
     row3 = row2 + row_height
     
-    cv2.putText(display, 'Curvature Radius:', (col1, row1), font, fontsize_mult, self.CYAN, fontthickness, linetype)
-    cv2.putText(display, '  L', (col1, row2), font, fontsize_mult, self.CYAN, fontthickness, linetype)
-    cv2.putText(display, l_curvature, (col2, row2), font, fontsize_mult, self.CYAN, fontthickness, linetype)
-    cv2.putText(display, '  R', (col1, row3), font, fontsize_mult, self.CYAN, fontthickness, linetype)
-    cv2.putText(display, r_curvature, (col2, row3), font, fontsize_mult, self.CYAN, fontthickness, linetype)
+    cv2.putText(overlay, 'Curvature Radius:', (col1, row1), font, fontsize_mult, self.CYAN, fontthickness, linetype)
+    cv2.putText(overlay, '  L', (col1, row2), font, fontsize_mult, self.CYAN, fontthickness, linetype)
+    cv2.putText(overlay, l_curvature, (col2, row2), font, fontsize_mult, self.CYAN, fontthickness, linetype)
+    cv2.putText(overlay, '  R', (col1, row3), font, fontsize_mult, self.CYAN, fontthickness, linetype)
+    cv2.putText(overlay, r_curvature, (col2, row3), font, fontsize_mult, self.CYAN, fontthickness, linetype)
     
     # Add vehicle position data (offset from center of lane)
-    middle = display.shape[1] // 2
-    arrow_x = middle-70
+    middle = overlay_width // 2
+    arrow_x = middle - 70
     arrow = '<--'
     position = "{:>+5.2f} m".format(vehicle_position)
     
@@ -138,13 +145,50 @@ class Visualizer():
         
     veh_pos_y = 600
     
-    cv2.putText(display, position, (middle-70, veh_pos_y), font, fontsize_mult, self.WHITE, fontthickness, linetype)
-    cv2.putText(display, '|', (middle, veh_pos_y+row_height), font, fontsize_mult, self.WHITE, fontthickness, linetype)
-    cv2.putText(display, arrow, (arrow_x, veh_pos_y+row_height), font, fontsize_mult, self.WHITE, fontthickness, linetype)
+    cv2.putText(overlay, position, (middle-70, veh_pos_y), font, fontsize_mult, self.WHITE, fontthickness, linetype)
+    cv2.putText(overlay, '|', (middle, veh_pos_y+row_height), font, fontsize_mult, self.WHITE, fontthickness, linetype)
+    cv2.putText(overlay, arrow, (arrow_x, veh_pos_y+row_height), font, fontsize_mult, self.WHITE, fontthickness, linetype)
     
-    self.lane_highlighted_HUD_info = display
+    # Add binary image visuals
+    scaled_combined_binary = self.scale(self.increase_channels(self.combined_binary))
+    scaled_warped_combined = self.scale(self.increase_channels(self.warped_combined))
+    scaled_sliding_windows = self.scale(self.detected_lane_lines_warped)
 
+    img_width = image.shape[1]
+    img_height = image.shape[0]
+    scaled_histogram = np.zeros((img_height, img_width, 3))
+    plotx = np.linspace(0, img_width-1, img_width)
+
+    curve_thickness = 6
+    pts = np.dstack((plotx, (img_height - 200) - histogram)) # invert the plotting
+    pts = np.array(pts, np.int32)
+    pts = pts.reshape((-1, 1, 2))
+    cv2.polylines(scaled_histogram, [pts], isClosed=False, color=self.CYAN, thickness=curve_thickness)
+    scaled_histogram = self.scale(scaled_histogram)
+
+    scaled_width = scaled_combined_binary.shape[1]
+    scaled_height = scaled_combined_binary.shape[0]
+    binary_strip = np.zeros((scaled_height*4, scaled_width, 3))
+    binary_strip[0:scaled_height,0:scaled_width,:] = scaled_combined_binary
+    binary_strip[scaled_height:2*scaled_height,0:scaled_width,:] = scaled_warped_combined
+    binary_strip[2*scaled_height:3*scaled_height,0:scaled_width,:] = scaled_sliding_windows
+    binary_strip[3*scaled_height:4*scaled_height,0:scaled_width,:] = scaled_histogram
+
+
+    self.lane_highlighted_HUD_info = cv2.addWeighted(image, 1, overlay, 1, 0)
+    self.lane_highlighted_HUD_info[0:binary_strip.shape[0],0:binary_strip.shape[1],:] = binary_strip
+    
     return self.lane_highlighted_HUD_info
+
+
+  def scale(self, image, factor=0.2):
+    width = int(image.shape[1] * factor)
+    height = int(image.shape[0] * factor)
+    resized = cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+    return resized
+
+  def increase_channels(self, binary_image):
+    return np.dstack((binary_image, binary_image, binary_image)) * 255
 
 
   def save_image(self, image, filename):

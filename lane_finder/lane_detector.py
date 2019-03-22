@@ -26,7 +26,7 @@ class LaneDetector():
 
     self.lane_lines = LaneLines()
     self.lane_curvature = None
-    self.lane_curve_rads = []
+    self.lane_curve_rads = None
     self.vehichle_pos = None
 
     # Visuals
@@ -53,20 +53,24 @@ class LaneDetector():
 
     # 3. Combine gradient and color binary thresholds
     self.combined = self.binary_thresholder.combine_thresholds(self.corrected_image)
+    self.visualizer.combined_binary = self.combined
 
     # 4. Warp combined binary thresholds image to "bird's eye view"
     # first store warped corrected image for reference
     self.warped_corrected = self.perspective_transformer.warp_img(self.corrected_image)
     self.warped_combined = self.perspective_transformer.warp_img(self.combined)
+    self.visualizer.warped_combined = self.warped_combined
 
     # 5. Detect lane lines using window boxing
     self.detect_lane_lines(self.warped_combined)
+    self.visualizer.visualize_detected_lane_lines(self.warped_combined, self.lane_lines)
 
     # 6. Determine lane curvature
     self.lane_curvature = LaneCurvature(self.lane_lines)
+    self.lane_curve_rads = []
     self.lane_curve_rads.append(self.lane_curvature.left_curvature)
     self.lane_curve_rads.append(self.lane_curvature.right_curvature)
-    
+
     # 7. Determine vehicle position within lane
     self.vehichle_pos = self.position_offset()
 
@@ -80,7 +84,8 @@ class LaneDetector():
     self.result = self.visualizer.add_HUD_info(
                               self.result,
                               self.lane_curve_rads,
-                              self.vehichle_pos)
+                              self.vehichle_pos,
+                              self.lane_lines.histogram)
 
     # 9. Clean up; reset thresholder once image is fully processed; 
     # get it ready for next image to be processed
