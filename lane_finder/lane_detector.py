@@ -85,7 +85,7 @@ class LaneDetector():
                               self.result,
                               self.lane_curve_rads,
                               self.vehichle_pos,
-                              self.lane_lines.histogram)
+                              self.lane_lines.histogram_freqs)
 
     # 9. Clean up; reset thresholder once image is fully processed; 
     # get it ready for next image to be processed
@@ -187,7 +187,7 @@ class LaneDetector():
     self.lane_lines.right_fitx = right_fitx
     
     self.lane_lines.sliding_windows = sliding_windows
-    self.lane_lines.histogram = histogram
+    self.lane_lines.histogram_freqs = histogram
 
     return self.lane_lines
 

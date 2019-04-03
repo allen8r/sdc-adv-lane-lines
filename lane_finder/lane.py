@@ -24,8 +24,8 @@ class LaneLines():
     # Window boxes (upper left and lower right coords) used to capture lane pixels
     self.sliding_windows = []
 
-    # histogram of pixel density of lane lines in the lower-half of the image
-    self.histogram = None
+    # histogram frequency counts of pixel density of lane lines in the lower-half of the image
+    self.histogram_freqs = None
 
 
 
