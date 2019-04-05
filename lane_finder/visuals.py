@@ -137,9 +137,9 @@ class Visualizer():
 
   def create_details_panel(self, image, lane_curve_rads, histogram_freqs):
     # Add binary image visuals
-    scaled_combined_binary = self.scale(self.increase_channels(self.combined_binary))
-    scaled_warped_combined = self.scale(self.increase_channels(self.warped_combined))
-    scaled_sliding_windows = self.scale(self.detected_lane_lines_warped)
+    scaled_combined_binary = self.scale(self.draw_border(self.increase_channels(self.combined_binary)))
+    scaled_warped_combined = self.scale(self.draw_border(self.increase_channels(self.warped_combined)))
+    scaled_sliding_windows = self.scale(self.draw_border(self.detected_lane_lines_warped))
 
     self.lane_lines_histogram = self.plot_histogram(image, histogram_freqs)
     scaled_histogram = self.scale(self.lane_lines_histogram)
@@ -184,7 +184,7 @@ class Visualizer():
     cv2.putText(details_panel, r_curvature, (col2, row3), font, fontsize_mult,  color, fontthickness, linetype)
 
     # Combine with the background to create a tinted panel effect
-    details_panel = cv2.addWeighted(details_panel, 1, details_panel_bg, 0.2, 0)
+    details_panel = cv2.addWeighted(details_panel, 0.8, details_panel_bg, 0.2, 0)
 
     return details_panel
 
@@ -218,6 +218,22 @@ class Visualizer():
     Assumes the provided image is a single-channel image.
     """
     return np.dstack((binary_image, binary_image, binary_image)) * 255
+
+
+  def draw_border(self, image, color=(87, 220, 217)):
+    decorated = image
+    lower_right_corner = (decorated.shape[1], decorated.shape[0])
+
+    # draw black edge border
+    cv2.rectangle(decorated, (0, 0), lower_right_corner, (0, 0, 0), thickness=30)
+
+    # draw highlight border
+    offset = 20
+    lrc_x = lower_right_corner[0] - offset
+    lrc_y = lower_right_corner[1] - offset
+    cv2.rectangle(decorated, (offset, offset), (lrc_x, lrc_y), color, thickness=8)
+
+    return decorated
 
 
   def save_image(self, image, filename):

@@ -87,10 +87,6 @@ class LaneDetector():
                               self.vehichle_pos,
                               self.lane_lines.histogram_freqs)
 
-    # 9. Clean up; reset thresholder once image is fully processed; 
-    # get it ready for next image to be processed
-    #self.reset_pipeline()
-
     return self.result
 
 
@@ -222,6 +218,3 @@ class LaneDetector():
   def get_histogram(self, image):
     '''Retrieve histogram of pixel density for lane lines in lower half of the image'''
     return np.sum(image[image.shape[0]//2:,:], axis=0)
-
-  def reset_pipeline(self):
-    pass
