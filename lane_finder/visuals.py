@@ -57,7 +57,7 @@ class Visualizer():
         # cv2 needs top-left and bottom-right points of the rectangle
         pt1 = (l_x, t_y)
         pt2 = (r_x, b_y)
-        cv2.rectangle(out_img, pt1, pt2, self.v_elems.GREEN, thickness=6)
+        cv2.rectangle(out_img, pt1, pt2, self.v_elems.GREEN, thickness=4)
         
     #Draw 2nd-degree polynomial fit curves
     curve_thickness = 9
@@ -106,7 +106,7 @@ class Visualizer():
     overlay_height = overlay.shape[0]
 
     middle = overlay_width // 2
-    arrow_x = middle - 70
+    arrow_x = middle - 55
     arrow = '<--'
     position = "{:>+5.2f} m".format(vehicle_position)
     
@@ -123,7 +123,7 @@ class Visualizer():
     fontthickness = self.v_elems.fontthickness
     linetype = self.v_elems.linetype
 
-    cv2.putText(overlay, position, (middle-70, veh_pos_y), font, fontsize_mult, color, fontthickness, linetype)
+    cv2.putText(overlay, position, (middle-55, veh_pos_y), font, fontsize_mult, color, fontthickness, linetype)
     cv2.putText(overlay, '|', (middle, veh_pos_y+row_height), font, fontsize_mult, color, fontthickness, linetype)
     cv2.putText(overlay, arrow, (arrow_x, veh_pos_y+row_height), font, fontsize_mult, color, fontthickness, linetype)
     
@@ -184,10 +184,9 @@ class Visualizer():
     cv2.putText(details_panel, r_curvature, (col2, row3), font, fontsize_mult,  color, fontthickness, linetype)
 
     # Combine with the background to create a tinted panel effect
-    details_panel = cv2.addWeighted(details_panel, 0.8, details_panel_bg, 0.2, 0)
+    details_panel = cv2.addWeighted(details_panel, 0.9, details_panel_bg, 0.10, 0)
 
     return details_panel
-
 
 
   def plot_histogram(self, image, histogram_freqs):
@@ -198,11 +197,10 @@ class Visualizer():
     histogram = np.zeros((img_height, img_width, 3))
     plotx = np.linspace(0, img_width-1, img_width)
 
-    curve_thickness = 6
     pts = np.dstack((plotx, (img_height - padding) - histogram_freqs)) # invert the plotting
     pts = np.array(pts, np.int32)
     pts = pts.reshape((-1, 1, 2))
-    cv2.polylines(histogram, [pts], isClosed=False, color=self.v_elems.GREEN, thickness=curve_thickness)
+    cv2.polylines(histogram, [pts], isClosed=False, color=self.v_elems.GREEN, thickness=4)
     
     return histogram
 
@@ -276,7 +274,7 @@ class VisualElements():
     self.PURPLE = (153, 0, 153)
 
     self.font = cv2.FONT_HERSHEY_SIMPLEX
-    self.fontsize_mult = 0.85
+    self.fontsize_mult = 0.80
     self.fontthickness = 2
     self.linetype = cv2.LINE_AA
     self.italics = cv2.FONT_ITALIC
