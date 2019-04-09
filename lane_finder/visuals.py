@@ -114,7 +114,7 @@ class Visualizer():
         arrow = '-->'
         arrow_x = middle
   
-    veh_pos_y = 600
+    veh_pos_y = 620
     
     row_height = self.v_elems.row_height
     font = self.v_elems.font
@@ -137,12 +137,12 @@ class Visualizer():
 
   def create_details_panel(self, image, lane_curve_rads, histogram_freqs):
     # Add binary image visuals
-    scaled_combined_binary = self.scale(self.draw_border(self.increase_channels(self.combined_binary)))
-    scaled_warped_combined = self.scale(self.draw_border(self.increase_channels(self.warped_combined)))
-    scaled_sliding_windows = self.scale(self.draw_border(self.detected_lane_lines_warped))
+    scaled_combined_binary = self.scale(self.decorate_display(self.combined_binary, "BINARY THRESHOLDS", True))
+    scaled_warped_combined = self.scale(self.decorate_display(self.warped_combined, "WARPED BINARY", True))
+    scaled_sliding_windows = self.scale(self.decorate_display(self.detected_lane_lines_warped, "SLIDING WINDOWS"))
 
     self.lane_lines_histogram = self.plot_histogram(image, histogram_freqs)
-    scaled_histogram = self.scale(self.lane_lines_histogram)
+    scaled_histogram = self.scale(self.decorate_display(self.lane_lines_histogram, "LANE LINE PIXELS"))
 
     scaled_width = scaled_combined_binary.shape[1]
     scaled_height = scaled_combined_binary.shape[0]
@@ -165,7 +165,7 @@ class Visualizer():
     col1 = left_align + 10
     col2 = col1 + 75
 
-    top_align = 600
+    top_align = 620
     row_height = self.v_elems.row_height
     row1 = top_align
     row2 = row1 + row_height
@@ -192,16 +192,17 @@ class Visualizer():
 
   def plot_histogram(self, image, histogram_freqs):
     img_width = image.shape[1]
-    padding = 150
-    img_height = int(image.shape[0] / 2 + padding)
+    img_height = image.shape[0]
+    padding = 175
+    #img_height = int(image.shape[0] / 2 + padding)
     histogram = np.zeros((img_height, img_width, 3))
     plotx = np.linspace(0, img_width-1, img_width)
 
     curve_thickness = 6
-    pts = np.dstack((plotx, (img_height - (padding / 4)) - histogram_freqs)) # invert the plotting
+    pts = np.dstack((plotx, (img_height - padding) - histogram_freqs)) # invert the plotting
     pts = np.array(pts, np.int32)
     pts = pts.reshape((-1, 1, 2))
-    cv2.polylines(histogram, [pts], isClosed=False, color=self.v_elems.CYAN, thickness=curve_thickness)
+    cv2.polylines(histogram, [pts], isClosed=False, color=self.v_elems.GREEN, thickness=curve_thickness)
     
     return histogram
 
@@ -236,6 +237,26 @@ class Visualizer():
     return decorated
 
 
+  def label_display(self, image, label):
+    decorated = image
+    position = (35, image.shape[0]-35)
+
+    cv2.putText(decorated, label, position, 
+                self.v_elems.font, 1.75,
+                self.v_elems.CYAN, self.v_elems.fontthickness,
+                self.v_elems.linetype)
+
+    return decorated
+
+
+  def decorate_display(self, image, label, binary_img=False):
+    decorated = image
+    if binary_img:
+      decorated = self.increase_channels(decorated)
+    decorated = self.label_display(self.draw_border(decorated), label)
+    return decorated
+
+
   def save_image(self, image, filename):
     print(f"Saving {filename}")
     # NOTE: image[:, :, ::-1] reverses the (default BRG channels
@@ -258,6 +279,7 @@ class VisualElements():
     self.fontsize_mult = 0.85
     self.fontthickness = 2
     self.linetype = cv2.LINE_AA
+    self.italics = cv2.FONT_ITALIC
 
     self.row_height = 40
 
