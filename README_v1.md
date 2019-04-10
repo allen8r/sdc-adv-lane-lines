@@ -1,7 +1,7 @@
 # Advanced Lane Finding
 
 <p>
-<img width="640" src="./output_videos/refactored_output.gif" alt="Detected Lane">
+<img width="640" src="./output_images/project_output.gif" alt="Detected Lane">
 </p>
 
 The goal of this project is to write a software pipeline to identify the lane boundaries in a traffic video from the perspective of a moving vehicle from which the video was captured. A [writeup](./writeup_report.md) of the project describes the details of the lane detection pipeline.  
