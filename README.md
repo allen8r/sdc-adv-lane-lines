@@ -1,10 +1,17 @@
 # Advanced Lane Finding
 
-<p>
-<img width="640" src="./output_images/project_output.gif" alt="Detected Lane">
-</p>
+![Detected Lane](./output_videos/refactored_output.gif)
 
-The goal of this project is to write a software pipeline to identify the lane boundaries in a traffic video from the perspective of a moving vehicle from which the video was captured. A [writeup](./writeup_report.md) of the project describes the details of the lane detection pipeline.  
+The goal of this project is to write a software pipeline to identify the lane boundaries in a traffic video from the perspective of a moving vehicle from which the video was captured. A [writeup](./writeup_report.md) of the project describes the details of the lane detection pipeline.
+
+Note that the writeup describes the work done on the original prototype version of the project. All orginal work was done in a single lengthy Jupyter notebook, [find-lane-lines.ipynb](./find-lane-lines.ipynb). The project has now been completely refactored and reorganized into modular components to closely match the components in the image processing pipeline. The refactored Python classes are located in the [lane_finder](./lane_finder) subdirectory/module. In [lane_detector.py](./lane_finder/lane_detector.py) you will find the main driver method, `LaneDetector.detect_lane()`. [Using_the_LaneDetector_Class.ipynb](./Using_the_LaneDetector_Class.ipynb) demonstrates how the LaneDetector class is used in detecting the traffic lane in an input image of the road. A [refactored output video](./output_videos/refactored_output.mp4) is also generated in the demo notebook.
+
+The above gif image is a sample of the newly generated output video from the refactored pipeline. The video has been ehanced with additional details in a side panel, displaying the various pipeline stages of the image processing. The details panel include images from:
+1. the binary thresholding
+2. the image warping into a "birds-eye" view of the road
+3. the sliding window detection of lane line pixels
+4. a histogram plot of the detected lane line pixels
+5. the calculated lane line curvatures in the road
 
 ---
 
@@ -15,7 +22,7 @@ The steps of this project are:
 * Compute the camera calibration matrix and distortion coefficients given a set of chessboard images.
 * Apply a distortion correction to raw images.
 * Use color transforms, gradients, etc., to create a thresholded binary image.
-* Apply a perspective transform to rectify binary image to get a "birds-eye view".
+* Apply a perspective transform to rectify binary image to get a "birds-eye" view.
 * Detect lane pixels and fit to find the lane boundaries.
 * Determine the curvature of the lane and vehicle position with respect to center.
 * Warp the detected lane boundaries back onto the original image.
@@ -33,14 +40,16 @@ The [`harder_challenge.mp4`](./test_videos/harder_challenge.mp4) video is anothe
 
 ### Environment
 
-Suggested setup:
+###### Suggested setup:
 * [Anaconda](https://www.anaconda.com/download/) - Python platform for Data Science
-* Use conda import of [`environmenmt.txt`](./environment.txt) to replicate the python environment to run the Jupyter Notebook for this project.
+* Use conda import of [environmenmt.yml](./environment.txt) to replicate the python environment to run the Jupyter Notebook for this project.
 ```
-    conda env create --file environment.txt
+    conda env create --file environment.yml
 ```
 
-The project notebook is [`find-lane-lines.ipynb`](./find-lane-lines.ipynb)
+The project notebook is [Using_the_LaneDetector_Class.ipynb](./Using_the_LaneDetector_Class.ipynb.ipynb)
 
-###### NOTE:
-Because of their large sizes, the project's video files are stored in [Git LFS](https://github.com/git-lfs/git-lfs). Please install the Git LFS client to ensure that video files are downloaded properly when this project repo is cloned.
+
+###### Note:
+1. The original project notebook is [find-lane-lines.ipynb](./find-lane-lines.ipynb). Use the [environment.txt](./environment.txt) file instead to create the conda environment for the older notebook.
+2. Because of their large sizes, the project's video files are stored in [Git LFS](https://github.com/git-lfs/git-lfs). Please install the Git LFS client to ensure that video files are downloaded properly when this project repo is cloned.
