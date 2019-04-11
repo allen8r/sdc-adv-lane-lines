@@ -6,7 +6,7 @@ The goal of this project is to write a software pipeline to identify the lane bo
 
 Note that the writeup describes the work done on the original prototype version of the project. All orginal work was done in a single lengthy Jupyter notebook, [find-lane-lines.ipynb](./find-lane-lines.ipynb). The project has now been completely refactored and reorganized into modular components to closely match the components in the image processing pipeline. The refactored Python classes are located in the [lane_finder](./lane_finder) subdirectory/module. In [lane_detector.py](./lane_finder/lane_detector.py) you will find the main driver method, `LaneDetector.detect_lane()`. [Using_the_LaneDetector_Class.ipynb](./Using_the_LaneDetector_Class.ipynb) demonstrates how the LaneDetector class is used in detecting the traffic lane in an input image of the road. A [refactored output video](./output_videos/refactored_output.mp4) is also generated in the demo notebook.
 
-The above gif image is a sample of the newly generated output video from the refactored pipeline. The video has been ehanced with additional details in a side panel, displaying the various pipeline stages of the image processing. The details panel include images from:
+The above gif image is a sample of the newly generated output video from the refactored pipeline. The video has been enhanced with additional details in a side panel, displaying the various pipeline stages of the image processing. The details panel include images from:
 1. the binary thresholding
 2. the image warping into a "birds-eye" view of the road
 3. the sliding window detection of lane line pixels
